@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:ringtone/ringtone.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,7 +23,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Productivity timer'),
     );
   }
 }
@@ -44,17 +47,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  Timer _timer;
+  int _start = 20 * 60;
+  String _startMinutes = '';
+  String _startSeconds = '';
+  bool _started = false;
+  Icon _icon = Icon(Icons.timer);
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void _startTimer() {
+    _icon = Icon(Icons.toys);
+    if(_started){
+      _timer.cancel();
+      _start = 20 * 60;
+      Ringtone.stop();
+    } else {
+      _started = true;
+    }
+    const oneSec = const Duration(seconds: 1);
+    _timer = new Timer.periodic(
+      oneSec,
+      (Timer timer) => setState(
+        () {
+          if (_start < 1) {
+            timer.cancel();
+            Ringtone.play();
+          } else {
+            _start = _start - 1;
+            _startMinutes = ((_start*1.0)/60).floor().toString().padLeft(2,'0');
+            _startSeconds = (_start%60).toString().padLeft(2,'0');
+          }
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -65,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -92,19 +123,19 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times asd:',
+              'Push the button to start the timer:',
             ),
             Text(
-              '$_counter',
+              '$_startMinutes:$_startSeconds',
               style: Theme.of(context).textTheme.display1,
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+        onPressed: _startTimer,
+        tooltip: 'Start Timer',
+        child: _icon,
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
