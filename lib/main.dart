@@ -48,17 +48,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Timer _timer;
-  int _start = 20 * 60;
-  String _startMinutes = '';
-  String _startSeconds = '';
+  String _initialMessage = 'Push the button to start the timer:';
+  String _displayMessage = 'Push the button to start the timer:';
+  int _focus = 20 * 60;
+  String _focusMessage = 'Focus on your work!';
+  int _dance = 5 * 60;
+  String _danceMessage = 'Wave your hands like you just don''t care!';
+  int _timerCountdown = 0;
+  String _displayMinutes = '';
+  String _displaySeconds = '';
   bool _started = false;
   Icon _icon = Icon(Icons.timer);
 
   void _startTimer() {
-    _icon = Icon(Icons.toys);
+    _icon = Icon(Icons.center_focus_strong);
+    _timerCountdown = _focus;
+    _displayMessage = _focusMessage;
     if(_started){
       _timer.cancel();
-      _start = 20 * 60;
       Ringtone.stop();
     } else {
       _started = true;
@@ -68,13 +75,13 @@ class _MyHomePageState extends State<MyHomePage> {
       oneSec,
       (Timer timer) => setState(
         () {
-          if (_start < 1) {
+          if (_timerCountdown < 1) {
             timer.cancel();
             Ringtone.play();
           } else {
-            _start = _start - 1;
-            _startMinutes = ((_start*1.0)/60).floor().toString().padLeft(2,'0');
-            _startSeconds = (_start%60).toString().padLeft(2,'0');
+            _timerCountdown = _timerCountdown - 1;
+            _displayMinutes = ((_timerCountdown*1.0)/60).floor().toString().padLeft(2,'0');
+            _displaySeconds = (_timerCountdown%60).toString().padLeft(2,'0');
           }
         },
       ),
@@ -123,10 +130,10 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'Push the button to start the timer:',
+              _displayMessage,
             ),
             Text(
-              '$_startMinutes:$_startSeconds',
+              '$_displayMinutes:$_displaySeconds',
               style: Theme.of(context).textTheme.display1,
             ),
           ],
